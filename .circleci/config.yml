@@ -968,6 +968,17 @@ jobs:
           mentions: <<parameters.slack-mentions>>
           channel: <<parameters.slack-channel>>
 
+  cleanup-stacks:
+    docker:
+      - image: determinedai/cimg-base:stable
+    steps:
+      - checkout
+      - setup-python-venv:
+          determined-common: true
+          determined-deploy: true
+          executor: determinedai/cimg-base:stable
+      - run: python .circleci/scripts/remove_stacks.py
+
 
 workflows:
   lint:
@@ -1262,3 +1273,15 @@ workflows:
       - upload-try-now-template:
           context: determined-production
           filters: *release-filters
+
+  cleanup:
+#    triggers:
+#      - schedule:
+#          cron: "0 5 * * *"
+#          filters:
+#            branches:
+#              only:
+#                - master
+    jobs:
+      - cleanup-stacks:
+          context: aws
